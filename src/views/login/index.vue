@@ -1,45 +1,43 @@
 <template>
   <el-row class="login-container" justify="center" :align="'middle'">
-      <el-card style="max-width: 480px">
-        <template #header>
-          <div class="card-header">
-            <!-- public目录下的资源可以通过"/"访问 -->
-            <!-- <img src="/login-head.png" alt=""> -->
-            <!-- 或者通过vite静态资源处理方法 -->
-            <img :src="imgUrl" alt="">
-          </div>
-        </template>
-        <div class="jump-link">
-          <el-link @click="handleChange" type="primary" underline>{{formType ? '返回登录' : '注册账号'}}</el-link>
+    <el-card style="max-width: 480px">
+      <template #header>
+        <div class="card-header">
+          <!-- public目录下的资源可以通过"/"访问 -->
+          <!-- <img src="/login-head.png" alt=""> -->
+          <!-- 或者通过vite静态资源处理方法 -->
+          <img :src="imgUrl" alt="">
         </div>
-        <el-form
-          ref="loginFormRef"
-          style="max-width: 600px"
-          :model="loginForm"
-          status-icon
-          :rules="rules"
-          class="demo-ruleForm"
-        >
-          <el-form-item prop="userName">
-            <el-input v-model="loginForm.userName" :prefix-icon="UserFilled" placeholder="手机号" autocomplete="off" />
-          </el-form-item>
-          <el-form-item prop="passWord">
-            <el-input v-model="loginForm.passWord" :prefix-icon="Lock" type="passWord" placeholder="密码" autocomplete="off" />
-          </el-form-item>
-          <el-form-item v-if="formType" prop="validCode">
-            <el-input v-model="loginForm.validCode" :prefix-icon="Lock" placeholder="验证码" autocomplete="off">
-              <template #append>
-                <span @click="countdownChange">{{countdown.validText}}</span>
-              </template>
-            </el-input>
-          </el-form-item>
-          <el-form-item>
-            <el-button :style="{width: '100%'}" type="primary" @click="submitForm(loginFormRef)">
-              {{formType ? '注册账号' : '登录'}}
-            </el-button>
-          </el-form-item>
-        </el-form>
-      </el-card>
+      </template>
+      <div class="jump-link">
+        <el-link @click="handleChange" type="primary" underline>{{ formType ? '返回登录' : '注册账号' }}</el-link>
+      </div>
+      <el-form ref="loginFormRef" style="max-width: 600px" :model="loginForm" status-icon :rules="rules"
+        class="demo-ruleForm">
+        <el-form-item prop="userName">
+          <el-input v-model="loginForm.userName" :prefix-icon="UserFilled" placeholder="手机号" autocomplete="off" />
+        </el-form-item>
+        <el-form-item>
+          <el-checkbox v-active="rememberMe">记住手机号</el-checkbox>
+        </el-form-item>
+        <el-form-item prop="passWord">
+          <el-input v-model="loginForm.passWord" :prefix-icon="Lock" type="passWord" placeholder="密码"
+            autocomplete="off" />
+        </el-form-item>
+        <el-form-item v-if="formType" prop="validCode">
+          <el-input v-model="loginForm.validCode" :prefix-icon="Lock" placeholder="验证码" autocomplete="off">
+            <template #append>
+              <span @click="countdownChange">{{ countdown.validText }}</span>
+            </template>
+          </el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button :style="{ width: '100%' }" type="primary" @click="submitForm(loginFormRef)">
+            {{ formType ? '注册账号' : '登录' }}
+          </el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
   </el-row>
 </template>
 <script setup>
@@ -79,7 +77,7 @@ const validatePass = (rule, value, callback) => {
     const reg = /^[a-zA-Z0-9_-]{4,16}$/
     reg.test(value) ? callback() : callback(new Error('密码格式不对,需要4到16位字母/数字/下划线/减号'))
   }
-  
+
 }
 const rules = reactive({
   userName: [{ validator: validateUser, trigger: 'blur' }],
@@ -90,6 +88,9 @@ const loginFormRef = ref()
 const router = useRouter()
 const store = useStore();
 
+// 定义一个响应式变量，默认不勾选
+const rememberMe = ref(false);
+
 const routerList = computed(() => store.state.menu.routerList)
 
 const submitForm = (formEl) => {
@@ -99,6 +100,18 @@ const submitForm = (formEl) => {
       if (!formType.value) {
         login(loginForm).then(({ data }) => {
           console.log(data)
+
+          // 登录成功后
+          if (data.code === 10000) {
+            if (rememberMe.value) {
+              // 如果勾选了，就把手机号存起来
+              localStorage.setItem('savedUserName', loginForm.userName)
+            } else {
+              // 如果没勾选，就清空
+              localStorage.removeItem('savedUserName')
+            }
+          }
+
           if (data.code === 10000) {
             // 将token放入缓存
             localStorage.setItem('token', data.data.token)
@@ -127,6 +140,15 @@ const submitForm = (formEl) => {
     }
   })
 }
+
+onMounted(() => {
+  const savedName = localStorage.getItem('savedUserName')
+  if (savedName) {
+    loginForm.userName = savedName
+    rememberMe.value = true // 顺便帮用户把勾也打上
+  }
+})
+
 // 切换表单(0为登录，1为注册)
 const formType = ref(0)
 const handleChange = () => {
@@ -166,26 +188,29 @@ const countdownChange = () => {
   flag = true
   console.log('发送短信')
   getCode({ tel: loginForm.userName }).then(() => {
-    
+
   })
 }
 </script>
 <style lang="less" scoped>
-  :deep(.el-card__header) {
-    padding: 0
-  }
-  .login-container {
-    height: 100%;
-    .card-header{
-      background-color: #899fe1;
-      img {
-        width: 430px;
-      }
-    }
-    .jump-link {
-      text-align: right;
-      margin-bottom: 10px;
+:deep(.el-card__header) {
+  padding: 0
+}
+
+.login-container {
+  height: 100%;
+
+  .card-header {
+    background-color: #899fe1;
+
+    img {
+      width: 430px;
     }
   }
-  
+
+  .jump-link {
+    text-align: right;
+    margin-bottom: 10px;
+  }
+}
 </style>

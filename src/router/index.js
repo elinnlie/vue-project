@@ -52,7 +52,7 @@ const routes = [
       // },
       // {
       //   path: 'vppz',
-      //   meta: { id: '3', name: 'DIDI陪诊', icon: 'BellFilled' },
+      //   meta: { id: '3', name: 'DIDI医护', icon: 'BellFilled' },
       //   children: [
       //     {
       //       path: '',

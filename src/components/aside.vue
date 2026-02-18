@@ -3,14 +3,17 @@
     :style="{ width: !isCollapse ? '230px' : '64px' }"
     :default-active="active"
     class="aside-container"
-    active-text-color="#ffd04b"
-    background-color="#545c64"
-    text-color="#fff"
+    active-text-color="#67cebc" 
+    background-color="#304156" 
+    text-color="#bfcbd9"
     :collapse="isCollapse"
     @open="handleOpen"
     @close="handleClose"
   >
-    <p class="logo-lg">{{ isCollapse ? "DIDI" : "DIDI陪诊" }}</p>
+    <div class="logo-box">
+      <el-icon v-if="isCollapse" :size="24"><Platform /></el-icon>
+      <span v-else class="logo-text">康护云 SaaS</span>
+    </div>
     <tree-menu :index="1" :menuData="menuData" />
   </el-menu>
 </template>
@@ -36,16 +39,28 @@ const handleClose = (key, keyPath) => {
   console.log(key, keyPath);
 };
 </script>
+
 <style lang="less" scoped>
 .aside-container {
-  // min-width: 230px;
   height: 100%;
-  .logo-lg {
-    font-size: 20px;
-    text-align: center;
-    height: 50px;
-    line-height: 50px;
+  border-right: none; 
+  transition: width 0.3s; 
+  
+  .logo-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60px;
+    line-height: 60px;
     color: #fff;
+    background-color: #2b2f3a; 
+    
+    .logo-text {
+      font-size: 18px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
   }
 }
 </style>

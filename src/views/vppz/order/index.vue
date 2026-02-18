@@ -13,14 +13,14 @@
             <el-button type="primary" @click="onSubmit">查询</el-button>
           </el-form-item>
         </el-form>
-    </div>
+    </div> 
     <el-table
       :data="tableData.list"
       stripe
       style="width: 100%">
         <el-table-column fixed label="订单号" prop="out_trade_no" width="150" />
         <el-table-column label="就诊医院" prop="hospital_name" />
-        <el-table-column label="陪诊服务" prop="service_name" />
+        <el-table-column label="医护服务" prop="service_name" />
         <el-table-column label="陪护师">
           <template #default="scope">
             <el-avatar :src="scope.row.companion.avatar"/>

@@ -61,14 +61,20 @@ const getData = async () => {
   if (data) {
     user.value = data.user;
     // types.value = data.types;
-    types.value = [{state: "待支付", num: 6}, {state: "待服务", num: 2}, {state: "已完成", num: 11}, {state: "已取消", num: 3}]
+    // 将 getData 函数里的模拟数据改掉
+    types.value = [
+      { state: "全网待处理工单", num: 6 },
+      { state: "今日在线医护", num: 2 },
+      { state: "累计服务机构", num: 11 },
+      { state: "本月异常工单", num: 3 }
+    ]
     // typeList.value = data.typeList;
     typeList.value = [
-      {date: '2024-07-26', order_sum: 5, order_money: 2.5},
-      {date: '2024-07-26', order_sum: 10, order_money: 5},
-      {date: '2024-07-26', order_sum: 6, order_money: 3},
-      {date: '2024-07-26', order_sum: 4, order_money: 2},
-      {date: '2024-07-26', order_sum: 8, order_money: 4}
+      { date: '2024-07-26', order_sum: 5, order_money: 2.5 },
+      { date: '2024-07-26', order_sum: 10, order_money: 5 },
+      { date: '2024-07-26', order_sum: 6, order_money: 3 },
+      { date: '2024-07-26', order_sum: 4, order_money: 2 },
+      { date: '2024-07-26', order_sum: 8, order_money: 4 }
     ]
     initEchart();
   }
@@ -101,7 +107,8 @@ const initEchart = () => {
       },
     },
     legend: {
-      data: ["订单数"],
+      data: ["调度工单"], // 这里改名字
+      top: 'bottom'      // 建议放在底部，更有大屏看板的感觉
     },
     xAxis: {
       data: typeList.value.map((item) => item.date),
@@ -124,10 +131,17 @@ const initEchart = () => {
     },
     series: [
       {
-        name: "订单数",
-        type: "line",
+        name: "调度工单", // 必须与 legend.data 保持一致
+        type: "line",    // 保持折线图
+        smooth: true,    // 建议加上，线条变圆滑，更有现代感
         data: typeList.value.map((item) => item.order_sum),
         symbolSize: 8,
+        areaStyle: {     // 建议加上阴影面积，视觉效果瞬间提升
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: "rgba(103, 206, 188, 0.5)" },
+            { offset: 1, color: "rgba(103, 206, 188, 0)" }
+          ])
+        },
       },
     ],
   };
@@ -149,36 +163,43 @@ onMounted(() => {
 .card {
   display: flex;
 }
+
 .user {
   margin: 20px 0;
   width: 45%;
+
   .user-card {
     .card-header {
       display: flex;
+
       .el-image {
         width: 120px;
         height: 120px;
         border-radius: 50%;
         margin: 5px;
       }
+
       span {
         line-height: 120px;
         font-size: 28px;
         font-weight: bold;
       }
     }
+
     .user-info {
       color: #666;
       line-height: 30px;
     }
   }
 }
+
 .serive-list {
   background-color: #fff;
   margin: 20px;
   height: 269px;
   width: 50%;
   margin-bottom: 40px;
+
   ::v-deep(.el-card__body) {
     display: flex;
     justify-content: space-between;
@@ -186,17 +207,29 @@ onMounted(() => {
     align-content: center;
 
     height: 95%;
+
     .serive-item {
       width: 50%;
       height: 50%;
       display: flex;
       justify-content: center;
+      align-items: center;
+
+      border-radius: var(--border-radius);
+      transition: all 0.3s;
+
+      .serive-item:hover {
+        background-color: rgba(103, 206, 188, 0.1);
+        transform: translateY(-2px);
+      }
+
       .img-box {
         width: 70px;
         height: 70px;
         text-align: center;
         margin-right: 10px;
         border-radius: 5px;
+
         img {
           margin: 5px;
           width: 60px;
@@ -210,16 +243,19 @@ onMounted(() => {
         line-height: 40px;
         font-weight: bold;
       }
+
       .name {
         font-size: 14px;
       }
     }
   }
 }
+
 .content {
   padding: 10px;
   background-color: #fff;
   width: 95%;
+
   .echart {
     height: 400px;
   }
